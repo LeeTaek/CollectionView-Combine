@@ -9,6 +9,14 @@ import UIKit
 import SnapKit
 
 class ViewController: UIViewController {
+  let searchBar: UISearchBar = {
+    let searchBar = UISearchBar()
+    searchBar.placeholder = "검색어 입력"
+    searchBar.searchBarStyle = .minimal
+    searchBar.layer.cornerRadius = 20
+    searchBar.layer.borderWidth = 1
+    return searchBar
+  }()
   
   let collectionView: UICollectionView = {
     let layout = UICollectionViewLayout()
@@ -24,9 +32,14 @@ class ViewController: UIViewController {
     // Do any additional setup after loading the view.
     configureCollectionView()
   }
+
+  private func addViews() {
+    self.view.addSubview(searchBar)
+    self.view.addSubview(collectionView)
+  }
   
   private func configureCollectionView() {
-    self.view.addSubview(collectionView)
+    addViews()
     
     collectionView.register(MainCell.self, forCellWithReuseIdentifier: "MainCell")
     collectionView.collectionViewLayout = createContentLayout()
@@ -37,9 +50,17 @@ class ViewController: UIViewController {
   }
   
   private func setupLayout() {
+    searchBar.snp.makeConstraints{
+      $0.width.equalToSuperview()
+      $0.height.equalTo(50)
+      $0.centerX.equalToSuperview()
+      $0.top.equalTo(view.safeAreaLayoutGuide)
+    }
+    
     collectionView.snp.makeConstraints{
       $0.width.height.equalToSuperview()
-      $0.center.equalToSuperview()
+      $0.centerX.equalToSuperview()
+      $0.top.equalTo(searchBar.snp.bottom).offset(10)
     }
   }
   
@@ -67,8 +88,8 @@ class ViewController: UIViewController {
   private func createContentLayout() -> UICollectionViewLayout {
     let layout: UICollectionViewCompositionalLayout = {
       let itemSpacing: CGFloat = 10
-      let width: CGFloat = 1.0 / 2.0
-      let height: CGFloat = 1.0 / 2.5
+      let width: CGFloat = 1.0
+      let height: CGFloat = 1.0 / 6.0
       
       // item
       let itemSize = NSCollectionLayoutSize (
@@ -94,8 +115,6 @@ class ViewController: UIViewController {
     
     return layout
   }
-  
-  
 }
 
 

@@ -9,10 +9,24 @@ import UIKit
 
 class MainCell: UICollectionViewCell {
   static let identifier = "MainCell"
+  var image: UIImageView = {
+    let imageView = UIImageView()
+    imageView.backgroundColor = .systemPink
+    imageView.image = UIImage(named: "string")
+    return imageView
+  }()
   
-  var cellNum: UILabel = {
-    var label = UILabel()
-    label.text = (0...50).map{ String($0) }.randomElement()!
+  var name: UILabel = {
+    let label = UILabel()
+    label.text = "Name"
+    label.textColor = .black
+    return label
+  }()
+  
+  var desc: UILabel = {
+    let label = UILabel()
+    label.text = "description"
+    label.textColor = .systemGray6
     return label
   }()
   
@@ -31,15 +45,33 @@ class MainCell: UICollectionViewCell {
   
   
   private func setUI() {
-    self.addSubview(cellNum)
+    self.addSubview(image)
+    self.addSubview(name)
+    self.addSubview(desc)
     self.backgroundColor = .white
   }
   
   private func setConstraints() {
-    cellNum.snp.makeConstraints {
-      $0.center.equalToSuperview()
+    image.snp.makeConstraints {
+      $0.leading.top.bottom.equalToSuperview().inset(10)
+      $0.width.equalTo(self.snp.height)
+    }
+    
+    name.snp.makeConstraints {
+      $0.leading.equalTo(image.snp.trailing).offset(10)
+      $0.top.trailing.equalToSuperview().inset(10)
+      $0.height.equalTo(30)
+    }
+    
+    desc.snp.makeConstraints {
+      $0.leading.equalTo(image.snp.trailing).offset(10)
+      $0.bottom.trailing.equalToSuperview().inset(10)
+      $0.top.equalTo(name.snp.bottom).offset(10)
     }
   }
 }
+
+
+
 
 
