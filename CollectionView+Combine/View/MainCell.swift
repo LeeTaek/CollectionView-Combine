@@ -7,6 +7,10 @@
 
 import UIKit
 
+import Kingfisher
+
+class MoviesCollectionViewDiffableDataSource: UICollectionViewDiffableDataSource<String?, Movies> { }
+
 class MainCell: UICollectionViewCell {
   static let identifier = "MainCell"
   var image: UIImageView = {
@@ -29,6 +33,13 @@ class MainCell: UICollectionViewCell {
     label.textColor = .systemGray6
     return label
   }()
+  
+  var movie: Movies! {
+    didSet {
+      setupData()
+    }
+  }
+  
   
   override init(frame: CGRect) {
     super.init(frame: frame)
@@ -68,6 +79,15 @@ class MainCell: UICollectionViewCell {
       $0.bottom.trailing.equalToSuperview().inset(10)
       $0.top.equalTo(name.snp.bottom).offset(10)
     }
+  }
+  
+  private func setupData() {
+    name.text = movie.title
+    desc.text = movie.description
+    
+    let imageURL = URL(string: movie.image)
+    image.kf.indicatorType = .activity
+    image.kf.setImage(with: imageURL)
   }
 }
 

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 import SnapKit
 
 class ViewController: UIViewController {
@@ -25,12 +26,18 @@ class ViewController: UIViewController {
     return cv
   }()
   
-  var dataSource: UICollectionViewDiffableDataSource<Int, Int>!
-
+  @Published var keyStroke: String = ""
+  var cancellables = Set<AnyCancellable>()
+  
+  var viewModel = ViewModel()
+  
   override func viewDidLoad() {
     super.viewDidLoad()
-    // Do any additional setup after loading the view.
+    searchBar.delegate = self
+    
     configureCollectionView()
+    setupObservers()
+    
   }
 
   private func addViews() {
@@ -41,11 +48,8 @@ class ViewController: UIViewController {
   private func configureCollectionView() {
     addViews()
     
-    collectionView.register(MainCell.self, forCellWithReuseIdentifier: "MainCell")
+    collectionView.register(MainCell.self, forCellWithReuseIdentifier: MainCell.identifier)
     collectionView.collectionViewLayout = createContentLayout()
-    setUpDataSource()
-    performCell()
-    
     setupLayout()
   }
   
@@ -62,26 +66,6 @@ class ViewController: UIViewController {
       $0.centerX.equalToSuperview()
       $0.top.equalTo(searchBar.snp.bottom).offset(10)
     }
-  }
-  
-  
-  private func setUpDataSource() {
-    dataSource = UICollectionViewDiffableDataSource<Int, Int>(collectionView: collectionView) { (collectionView, indexPath, itemIdentifier) -> UICollectionViewCell? in
-      guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MainCell", for: indexPath) as? UICollectionViewCell else {
-        return UICollectionViewCell()
-      }
-      
-      return cell
-    }
-  }
-  
-  private func performCell() {
-    let numOfCell: [Int] = (0..<10).map{ Int($0) }
-    
-    var snapShot = NSDiffableDataSourceSnapshot<Int, Int>()
-    snapShot.appendSections([0])
-    snapShot.appendItems(numOfCell)
-    self.dataSource.apply(snapShot)
   }
   
   
@@ -115,7 +99,35 @@ class ViewController: UIViewController {
     
     return layout
   }
+  
+  
+  func setupObservers() {
+    $keyStroke
+      .receive(on: RunLoop.main)
+      .sink { keyword in
+        print(keyword)
+        self.viewModel.keyword = keyword
+      }
+      .store(in: &cancellables)
+    
+    viewModel.diffableDataSource = MoviesCollectionViewDiffableDataSource(collectionView: collectionView) { (collectionView, indexPath, itemIdentifier) -> UICollectionViewCell? in
+      guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MainCell", for: indexPath) as? MainCell else { return UICollectionViewCell() }
+      
+      cell.movie = itemIdentifier
+      return cell
+    }
+  }
+  
 }
 
 
 
+extension ViewController: UISearchBarDelegate {
+  func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    self.keyStroke = searchText
+  }
+  
+  func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    self.keyStroke = ""
+  }
+}
